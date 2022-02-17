@@ -1,4 +1,4 @@
-name: Publish NuGet@alirezanet
+name: Publish NuGet@niubility
 author: Alireza Sabouri (@alirezanet) - ford Rohith Reddy (@rohith)
 description: Build, Pack & Publish a NuGet package with dotnet core on project version change
 
