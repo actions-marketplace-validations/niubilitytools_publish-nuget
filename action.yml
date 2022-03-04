@@ -1,5 +1,5 @@
 name: Publish NuGet@niubility
-author: Alireza Sabouri (@alirezanet) - ford Rohith Reddy (@rohith)
+author: Jimbo & Alireza Sabouri (@alirezanet) - ford Rohith Reddy (@rohith)
 description: Build, Pack & Publish a NuGet package with dotnet core on project version change
 
 inputs:
@@ -36,6 +36,10 @@ inputs:
         default: https://api.nuget.org
     INCLUDE_SYMBOLS:
         description: Flag to toggle pushing symbols along with nuget package to the server, disabled by default
+        required: false
+        default: false
+    ERROR_CONTINUE:
+        description: Flag to set continue the next task when some error happened
         required: false
         default: false
 
