@@ -1,7 +1,9 @@
 # ✨ Publish NuGet
+
 GitHub action to build, pack & publish nuget packages automatically when a project version is updated
 
 ## Usage
+
 Create new `.github/workflows/publish.yml` file:
 
 ```yml
@@ -25,7 +27,7 @@ jobs:
       # Publish
       - name: publish on version change
         id: publish_nuget
-        uses: alirezanet/publish-nuget@v3.0.0
+        uses: niubilitytools/publish-nuget@v3.0.1
         with:
           # Filepath of the project to be packaged, relative to root of repository
           PROJECT_FILE_PATH: Core/Core.csproj
@@ -56,6 +58,9 @@ jobs:
 
           # Flag to toggle pushing symbols along with nuget package to the server, disabled by default
           # INCLUDE_SYMBOLS: false
+
+          # Flag to set continue the next task when some error happened
+          # ERROR_CONTINUE: false
 ```
 
 - Project gets published only if there's a `NUGET_KEY` configured in the repository
@@ -72,8 +77,9 @@ VERSION_STATIC| | Useful with external providers like Nerdbank.GitVersioning, ig
 TAG_COMMIT | `true` | Flag to toggle git tagging, enabled by default
 TAG_FORMAT | `v*` | Format of the git tag, `[*]` gets replaced with actual version
 NUGET_KEY | | API key to authenticate with NuGet server
-NUGET_SOURCE | `https://api.nuget.org` | NuGet server uri hosting the packages, defaults to https://api.nuget.org
+NUGET_SOURCE | `https://api.nuget.org` | NuGet server uri hosting the packages, defaults to <https://api.nuget.org>
 INCLUDE_SYMBOLS | `false` | Flag to toggle pushing symbols along with nuget package to the server, disabled by default
+ERROR_CONTINUE  | `false` | Flag to set continue the next task when some error happened
 
 ## Outputs
 
@@ -86,9 +92,11 @@ SYMBOLS_PACKAGE_NAME | Name of the symbols package generated
 SYMBOLS_PACKAGE_PATH | Path to the generated symbols package
 
 **FYI:**
+
 - Outputs may or may not be set depending on the action inputs or if the action failed
 - `NUGET_SOURCE` must support `/v3-flatcontainer/PACKAGE_NAME/index.json` for version change detection to work
 - Multiple projects can make use of steps to configure each project individually, common inputs between steps can be given as `env` for [job / workflow](https://help.github.com/en/actions/automating-your-workflow-with-github-actions/workflow-syntax-for-github-actions#env)
 
 ## License
+
 [MIT](LICENSE)
