@@ -109,6 +109,7 @@ class Action {
           res.on('end', () => {
             const existingVersions = JSON.parse(body)
             if (existingVersions.versions.indexOf(this.version) < 0) this._pushPackage(this.version, this.packageName)
+            else this._printError('found the version ' + this.version + ' on the ' + this.nugetSource)
           })
         }
       })
