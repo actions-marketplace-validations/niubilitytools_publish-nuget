@@ -27,7 +27,7 @@ jobs:
       # Publish
       - name: publish on version change
         id: publish_nuget
-        uses: niubilitytools/publish-nuget@v3.2
+        uses: niubilitytools/publish-nuget@v3.3
         with:
           # Filepath of the project to be packaged, relative to root of repository
           PROJECT_FILE_PATH: Core/Core.csproj
