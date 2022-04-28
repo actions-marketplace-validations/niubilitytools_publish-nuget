@@ -97,19 +97,26 @@ class Action {
 
     console.log(`Package Name: ${this.packageName}`)
 
+    let versionCheckUrl = `${this.nugetSource}/v3-flatcontainer/${this.packageName}/index.json`
+    console.log(`Url of checking Version: ${versionCheckUrl}`)
     https
-      .get(`${this.nugetSource}/v3-flatcontainer/${this.packageName}/index.json`, (res) => {
+      .get(versionCheckUrl, (res) => {
         let body = ''
 
-        if (res.statusCode == 404) this._pushPackage(this.version, this.packageName)
+        if (res.statusCode == 404) {
+          console.log(`##[warning]😢 ${this.packageName} was never uploaded on NuGet or version checking url is not available now`)
+          this._pushPackage(this.version, this.packageName)
+        }
 
         if (res.statusCode == 200) {
           res.setEncoding('utf8')
           res.on('data', (chunk) => (body += chunk))
           res.on('end', () => {
             const existingVersions = JSON.parse(body)
-            if (existingVersions.versions.indexOf(this.version) < 0) this._pushPackage(this.version, this.packageName)
-            else console.log(`Found the version: ${this.nugetSource}/packages/${this.packageName}/${this.version}`)
+            if (existingVersions.versions.indexOf(this.version) < 0) {
+              console.log(`Current version ${this.version} is not found in NuGet. Versions:${existingVersions.versions}`)
+              this._pushPackage(this.version, this.packageName)
+            } else console.log(`Found the version: ${this.nugetSource}/packages/${this.packageName}/${this.version}`)
           })
         }
       })
