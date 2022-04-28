@@ -99,8 +99,13 @@ class Action {
 
     let versionCheckUrl = `${this.nugetSource}/v3-flatcontainer/${this.packageName}/index.json`
     console.log(`Url of checking Version: ${versionCheckUrl}`)
+    let options = {
+      headers: {
+        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.127 Safari/537.36 Edg/100.0.1185.44',
+      },
+    }
     https
-      .get(versionCheckUrl, (res) => {
+      .get(versionCheckUrl, options, (res) => {
         let body = ''
 
         if (res.statusCode == 404) {
