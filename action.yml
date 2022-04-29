@@ -58,6 +58,10 @@ inputs:
         description: Flag to set continue the next task when some error happened
         required: false
         default: false
+    NO_BUILD:
+        description: Flag to toggle building the project before pack, disabled by default
+        required: false
+        default: false
 
 outputs:
     VERSION:
