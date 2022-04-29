@@ -121,7 +121,7 @@ class Action {
             if (existingVersions.versions.indexOf(this.version) < 0) {
               console.log(`Current version ${this.version} is not found in NuGet. Versions:${existingVersions.versions}`)
               this._pushPackage(this.version, this.packageName)
-            } else console.log(`Found the version: ${this.nugetSource}/packages/${this.packageName}/${this.version}`)
+            } else console.log(`Found the version: ${this.nugetSource.replace('api.', '')}/packages/${this.packageName}/${this.version}`)
           })
         }
       })
