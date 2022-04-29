@@ -101,11 +101,11 @@ class Action {
     const packageFilename = packages.filter((p) => p.endsWith('.nupkg'))[0],
       symbolsFilename = packages.filter((p) => p.endsWith('.snupkg'))[0]
 
-    process.stdout.write(`::set-output name=PACKAGE_NAME::${packageFilename}` + os.EOL)
+    process.stdout.write(`::set-output name=package-name::${packageFilename}` + os.EOL)
     process.stdout.write(`::set-output name=package-path::${path.resolve(packageFilename)}` + os.EOL)
 
     if (symbolsFilename) {
-      process.stdout.write(`::set-output name=symbols-PACKAGE_NAME::${symbolsFilename}` + os.EOL)
+      process.stdout.write(`::set-output name=symbols-package-name::${symbolsFilename}` + os.EOL)
       process.stdout.write(`::set-output name=symbols-package-path::${path.resolve(symbolsFilename)}` + os.EOL)
     }
 
