@@ -1,7 +1,18 @@
 {
-  "dependencies": {
+  "name": "publish-nuget",
+  "version": "1.0.0",
+  "description": "GitHub action to build, pack & publish nuget packages automatically when a project version is updated",
+  "main": "index.js",
+  "dependencies": {},
+  "devDependencies": {
     "@actions/core": "^1.7.0",
-    "child_process": "^1.0.2",
-    "https": "^1.0.0"
-  }
+    "@vercel/ncc": "^0.33.4"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "ncc build index.js",
+    "dev": "ncc run index.js"
+  },
+  "author": "",
+  "license": "ISC"
 }

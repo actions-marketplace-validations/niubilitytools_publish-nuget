@@ -1,5 +1,5 @@
-name: Publish NuGet@niubility
-author: Jimbo & Alireza Sabouri (@alirezanet) - ford Rohith Reddy (@rohith)
+name: Publish NuGet
+author: Rohith Reddy (@rohith)
 description: Build, Pack & Publish a NuGet package with dotnet core on project version change
 
 inputs:
@@ -9,6 +9,7 @@ inputs:
     PACKAGE_NAME:
         description: NuGet package id, used for version detection & defaults to project name
         required: false
+    # Version Extraction
     VERSION_FILE_PATH:
         description: Filepath with version info, relative to root of repository & defaults to PROJECT_FILE_PATH
         required: false
@@ -17,6 +18,21 @@ inputs:
         required: false
         default: ^\s*<Version>(.*)<\/Version>\s*$
     VERSION_STATIC:
+        description: Useful with external providers like Nerdbank.GitVersioning, ignores VERSION_FILE_PATH & VERSION_REGEX
+        required: false
+    VERSION_STATIC_PREFIX:
+        description: Useful with external providers like Nerdbank.GitVersioning, ignores VERSION_FILE_PATH & VERSION_REGEX
+        required: false
+    VERSION_STATIC_SUFFIX:
+        description: Useful with external providers like Nerdbank.GitVersioning, ignores VERSION_FILE_PATH & VERSION_REGEX
+        required: false
+    ASSEMBLY_VERSION:
+        description: Useful with external providers like Nerdbank.GitVersioning, ignores VERSION_FILE_PATH & VERSION_REGEX
+        required: false
+    FILE_VERSION:
+        description: Useful with external providers like Nerdbank.GitVersioning, ignores VERSION_FILE_PATH & VERSION_REGEX
+        required: false
+    PACKAGE_VERSION:
         description: Useful with external providers like Nerdbank.GitVersioning, ignores VERSION_FILE_PATH & VERSION_REGEX
         required: false
     TAG_COMMIT:
@@ -49,19 +65,19 @@ outputs:
 
     PACKAGE_NAME:
         description: Name of the NuGet package generated
-    
+
     PACKAGE_PATH:
         description: Path to the generated NuGet package
 
     SYMBOLS_PACKAGE_NAME:
         description: Name of the symbols package generated
-    
+
     SYMBOLS_PACKAGE_PATH:
         description: Path to the generated symbols package
 
 runs:
     using: node12
-    main: index.js
+    main: dist/index.js
 
 branding:
     icon: package
