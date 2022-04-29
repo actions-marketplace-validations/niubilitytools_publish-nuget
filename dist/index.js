@@ -1995,11 +1995,17 @@ class Action {
     this.nugetSource = core.getInput('NUGET_SOURCE')
     this.includeSymbols = JSON.parse(core.getInput('INCLUDE_SYMBOLS'))
     this.errorContinue = JSON.parse(core.getInput('ERROR_CONTINUE'))
+    this.noBuild = JSON.parse(core.getInput('NO_BUILD'))
   }
 
   _validateInputs() {
     // make sure we don't have badly configured version flags
     if (this.version && this.versionFile) core.info("You provided 'version', extract-* keys are being ignored")
+  }
+
+  _printErrorAndExit(msg) {
+    core.error(`😭 ${msg}`)
+    throw new Error(msg)
   }
 
   _printError(msg) {
@@ -2036,9 +2042,7 @@ class Action {
   }
 
   _generatePackArgs() {
-    var args = `--no-build -c Release -p:PackageVersion=${this.version}`
-
-    if (this.includeSymbols) args = args + ' --INCLUDE_SYMBOLS -p:SymbolPackageFormat=snupkg'
+    var args = `--no-build -c Release -p:PackageVersion=${this.version} ${this.includeSymbols ? '--include-symbols -p:SymbolPackageFormat=snupkg' : ''} --no-build -c Release`
 
     return args
   }
@@ -2056,7 +2060,7 @@ class Action {
       .filter((fn) => /\.s?nupkg$/.test(fn))
       .forEach((fn) => fs.unlinkSync(fn))
 
-    this._executeInProcess(`dotnet build -c Release ${this.projectFile} /p:Version=${this.version}`)
+    if (!this.noBuild) this._executeInProcess(`dotnet build -c Release ${this.projectFile} /p:Version=${this.version}`)
 
     this._executeInProcess(`dotnet pack ${this._generatePackArgs()} ${this.projectFile} -o .`)
 
@@ -2068,7 +2072,7 @@ class Action {
       const pushOutput = this._executeCommand(pushCmd, { encoding: 'utf-8' }).stdout
       core.info(pushOutput)
 
-      if (/error/.test(pushOutput)) this._printError(`${/error.*/.exec(pushOutput)[0]}`)
+      if (/error/.test(pushOutput)) this._printErrorAndExit(`${/error.*/.exec(pushOutput)[0]}`)
     })
 
     const packageFilename = packages.filter((p) => p.endsWith('.nupkg'))[0],
@@ -2121,20 +2125,20 @@ class Action {
         }
       })
       .on('error', (e) => {
-        this._printError(`error: ${e.message}`)
+        this._printErrorAndExit(`error: ${e.message}`)
       })
   }
 
   run() {
     this._validateInputs()
 
-    if (!this.projectFile || !fs.existsSync(this.projectFile)) this._printError(`Project file '${this.projectFile}' not found`)
+    if (!this.projectFile || !fs.existsSync(this.projectFile)) this._printErrorAndExit(`Project file '${this.projectFile}' not found`)
 
     core.info(`Project Filepath: ${this.projectFile}`)
     core.debug(`Version (pre): '${this.version}'`)
 
     if (!this.version) {
-      if (this.versionFile !== this.projectFile && !fs.existsSync(this.versionFile)) this._printError('version file not found')
+      if (this.versionFile !== this.projectFile && !fs.existsSync(this.versionFile)) this._printErrorAndExit('version file not found')
 
       core.info(`Version Filepath: ${this.versionFile}`)
       core.info(`Version Regex: ${this.versionRegex}`)
@@ -2142,7 +2146,7 @@ class Action {
       const versionFileContent = fs.readFileSync(this.versionFile, { encoding: 'utf-8' }),
         parsedVersion = this.versionRegex.exec(versionFileContent)
 
-      if (!parsedVersion) this._printError('unable to extract version info!')
+      if (!parsedVersion) this._printErrorAndExit('unable to extract version info!')
 
       this.version = parsedVersion[1]
     }
