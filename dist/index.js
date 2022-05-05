@@ -2067,24 +2067,30 @@ class Action {
     const packages = fs.readdirSync('.').filter((fn) => fn.endsWith('nupkg'))
     core.info(`Generated Package(s): ${packages.join(', ')}`)
 
-    packages.forEach((nupkg) => {
-      const pushCmd = `dotnet nuget push ${nupkg} -s ${this.nugetSource}/v3/index.json -k ${this.nugetKey} --skip-duplicate ${!this.includeSymbols ? '--no-symbols' : ''}`
-      const pushOutput = this._executeCommand(pushCmd, { encoding: 'utf-8' }).stdout
-      core.info(pushOutput)
+    packages
+      .filter((p) => p.endsWith('.nupkg'))
+      .forEach((nupkg) => {
+        const pushCmd = `dotnet nuget push ${nupkg} -s ${this.nugetSource}/v3/index.json -k ${this.nugetKey} --skip-duplicate${!this.includeSymbols ? ' -n' : ''}`,
+          pushOutput = this._executeCommand(pushCmd, { encoding: 'utf-8' }).stdout
+        core.info(pushOutput)
 
-      if (/error/.test(pushOutput)) this._printErrorAndExit(`${/error.*/.exec(pushOutput)[0]}`)
-    })
+        if (/error/.test(pushOutput)) this._printErrorAndExit(`${/error.*/.exec(pushOutput)[0]}`)
 
-    const packageFilename = packages.filter((p) => p.endsWith('.nupkg'))[0],
-      symbolsFilename = packages.filter((p) => p.endsWith('.snupkg'))[0]
+        const symbolsFilename = nupkg.replace('.nupkg', '.snupkg'),
+          fullpathsymbolsFilename = path.resolve(symbolsFilename)
 
-    process.stdout.write(`::set-output name=package-name::${packageFilename}` + os.EOL)
-    process.stdout.write(`::set-output name=package-path::${path.resolve(packageFilename)}` + os.EOL)
+        process.stdout.write(`::set-output name=PACKAGE_NAME::${nupkg}` + os.EOL)
+        process.stdout.write(`::set-output name=PACKAGE_PATH::${path.resolve(nupkg)}` + os.EOL)
 
-    if (symbolsFilename) {
-      process.stdout.write(`::set-output name=symbols-package-name::${symbolsFilename}` + os.EOL)
-      process.stdout.write(`::set-output name=symbols-package-path::${path.resolve(symbolsFilename)}` + os.EOL)
-    }
+        if (symbolsFilename) {
+          if (fs.existsSync(fullpathsymbolsFilename)) {
+            process.stdout.write(`::set-output name=SYMBOLS_PACKAGE_NAME::${symbolsFilename}` + os.EOL)
+            process.stdout.write(`::set-output name=SYMBOLS_PACKAGE_PATH::${fullpathsymbolsFilename}` + os.EOL)
+          } else {
+            core.warning(`supkg [${symbolsFilename}] is not existed. path:[${fullpathsymbolsFilename}]`)
+          }
+        }
+      }) 
 
     if (this.tagCommit) this._tagCommit(version)
   }
