@@ -137,7 +137,7 @@ class Action {
         let body = ''
 
         if (res.statusCode == 404) {
-          core.info(`##[warning]😢 Url '${versionCheckUrl}' is not available now or '${this.packageName}' was never uploaded on NuGet`)
+          core.warning(`Url '${versionCheckUrl}' is not available now or '${this.packageName}' was never uploaded on NuGet`)
           this._pushPackage(this.version, this.packageName)
         }
 
