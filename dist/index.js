@@ -1989,15 +1989,16 @@ class Action {
     this.versionFile = core.getInput('VERSION_FILE_PATH') || this.projectFile
     this.versionRegex = new RegExp(core.getInput('VERSION_REGEX'), 'm')
     this.version = core.getInput('VERSION_STATIC')
-    this.tagCommit = JSON.parse(core.getInput('TAG_COMMIT'))
+    this.tagCommit = core.getBooleanInput('TAG_COMMIT')
     this.tagFormat = core.getInput('TAG_FORMAT')
     this.nugetKey = core.getInput('NUGET_KEY')
     this.nugetSource = core.getInput('NUGET_SOURCE')
-    this.includeSymbols = JSON.parse(core.getInput('INCLUDE_SYMBOLS'))
-    this.errorContinue = JSON.parse(core.getInput('ERROR_CONTINUE'))
-    this.noBuild = JSON.parse(core.getInput('NO_BUILD'))
+    this.includeSymbols = core.getBooleanInput('INCLUDE_SYMBOLS')
+    this.errorContinue = core.getBooleanInput('ERROR_CONTINUE')
+    this.noBuild = core.getBooleanInput('NO_BUILD')
     this.signingCert = core.getInput('SIGNING_CERT_FILE_NAME')
-    this.githubUser = core.getInput('GITHUB_ACTOR') // process.env.INPUT_GITHUB_USER || process.env.GITHUB_ACTOR
+    this.githubUser = core.getInput('GITHUB_USER') || process.env.GITHUB_ACTOR
+    this.githubPassword = core.getInput('GITHUB_PASSWORD') || this.nugetKey
 
     if (this.nugetSource.startsWith(`https://api.nuget.org`)) {
       this.sourceName = 'nuget.org'
@@ -2010,7 +2011,7 @@ class Action {
       let addSourceCmd
       if (this.nugetSource.startsWith(`https://nuget.pkg.github.com`)) {
         this.sourceType = 'GPR'
-        addSourceCmd = `dotnet nuget add source ${this.nugetSource}/index.json --name=${this.sourceName} -u=${this.githubUser} -p=${this.nugetKey} --store-password-in-clear-text`
+        addSourceCmd = `dotnet nuget add source ${this.nugetSource}/index.json --name=${this.sourceName} -u=${this.githubUser} -p=${this.githubPassword} --store-password-in-clear-text`
       } else {
         this.sourceType = 'NuGet'
         addSourceCmd = `dotnet nuget add source ${this.nugetSource}/v3/index.json --name=${this.sourceName}`
@@ -2102,7 +2103,7 @@ class Action {
         if (this.signingCert) this._executeInProcess(`dotnet nuget sign ${nupkg} -CertificatePath ${this.signingCert} -Timestamper http://timestamp.digicert.com`)
 
         // const pushCmd = `dotnet nuget push ${nupkg} -s ${this.nugetSource}/v3/index.json -k ${this.nugetKey} --skip-duplicate${!this.includeSymbols ? ' -n' : ''}`,
-        const pushCmd = `dotnet nuget push ${nupkg} -s ${this.sourceName} ${this.sourceType !== 'GPR' ? `-k ${this.nugetKey}` : ''}--skip-duplicate${
+        const pushCmd = `dotnet nuget push ${nupkg} -s ${this.sourceName} ${this.sourceType == 'NuGet' ? `-k ${this.nugetKey}` : ''}--skip-duplicate${
             !this.includeSymbols ? ' -n' : ''
           }`,
           pushOutput = this._executeCommand(pushCmd, { encoding: 'utf-8' }).stdout
@@ -2145,7 +2146,7 @@ class Action {
       versionCheckUrl = `${this.nugetSource}/download/${this.packageName}/index.json`.toLowerCase()
       options = {
         method: 'GET',
-        auth: `${this.githubUser}:${this.nugetKey}`,
+        auth: `${this.githubUser}:${this.githubPassword}`,
       }
       core.info(`This is GPR, changing url for versioning...`)
     } else {

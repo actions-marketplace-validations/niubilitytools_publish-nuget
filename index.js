@@ -12,15 +12,15 @@ class Action {
     this.versionFile = core.getInput('VERSION_FILE_PATH') || this.projectFile
     this.versionRegex = new RegExp(core.getInput('VERSION_REGEX'), 'm')
     this.version = core.getInput('VERSION_STATIC')
-    this.tagCommit = JSON.parse(core.getInput('TAG_COMMIT'))
+    this.tagCommit = core.getBooleanInput('TAG_COMMIT')
     this.tagFormat = core.getInput('TAG_FORMAT')
     this.nugetKey = core.getInput('NUGET_KEY')
     this.nugetSource = core.getInput('NUGET_SOURCE')
-    this.includeSymbols = JSON.parse(core.getInput('INCLUDE_SYMBOLS'))
-    this.errorContinue = JSON.parse(core.getInput('ERROR_CONTINUE'))
-    this.noBuild = JSON.parse(core.getInput('NO_BUILD'))
+    this.includeSymbols = core.getBooleanInput('INCLUDE_SYMBOLS')
+    this.errorContinue = core.getBooleanInput('ERROR_CONTINUE')
+    this.noBuild = core.getBooleanInput('NO_BUILD')
     this.signingCert = core.getInput('SIGNING_CERT_FILE_NAME')
-    this.githubUser = core.getInput('GITHUB_USER') || core.getInput('GITHUB_ACTOR') // process.env.INPUT_GITHUB_USER || process.env.GITHUB_ACTOR
+    this.githubUser = core.getInput('GITHUB_USER') || process.env.GITHUB_ACTOR
     this.githubPassword = core.getInput('GITHUB_PASSWORD') || this.nugetKey
 
     if (this.nugetSource.startsWith(`https://api.nuget.org`)) {
