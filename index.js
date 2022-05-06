@@ -20,7 +20,7 @@ class Action {
     this.errorContinue = JSON.parse(core.getInput('ERROR_CONTINUE'))
     this.noBuild = JSON.parse(core.getInput('NO_BUILD'))
     this.signingCert = core.getInput('SIGNING_CERT_FILE_NAME')
-    this.githubUser = core.getInput('GITHUB_ACTOR') // process.env.INPUT_GITHUB_USER || process.env.GITHUB_ACTOR
+    this.githubUser =core.getInput('GITHUB_USER') || core.getInput('GITHUB_ACTOR') // process.env.INPUT_GITHUB_USER || process.env.GITHUB_ACTOR
 
     if (this.nugetSource.startsWith(`https://api.nuget.org`)) {
       this.sourceName = 'nuget.org'

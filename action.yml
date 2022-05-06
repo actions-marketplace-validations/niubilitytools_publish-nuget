@@ -46,7 +46,6 @@ inputs:
     NUGET_KEY:
         description: API key to authenticate with NuGet server
         required: false
-        default: ${{secrets.NUGET_API_KEY}}
     NUGET_SOURCE:
         description: NuGet server uri hosting the packages, https://nuget.pkg.github.com or https://api.nuget.org. defaults to https://api.nuget.org
         required: false
