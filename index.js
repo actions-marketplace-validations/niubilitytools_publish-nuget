@@ -125,7 +125,7 @@ class Action {
 
     core.info(`Package Name: ${this.packageName}`)
 
-    let versionCheckUrl = `${this.nugetSource}/v3-flatcontainer/${this.packageName}/index.json`
+    let versionCheckUrl = `${this.nugetSource}/v3-flatcontainer/${this.packageName}/index.json`.toLowerCase()
     core.info(`Url of checking Version: ${versionCheckUrl}`)
     let options = {
       headers: {
