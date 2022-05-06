@@ -19,6 +19,7 @@ class Action {
     this.includeSymbols = JSON.parse(core.getInput('INCLUDE_SYMBOLS'))
     this.errorContinue = JSON.parse(core.getInput('ERROR_CONTINUE'))
     this.noBuild = JSON.parse(core.getInput('NO_BUILD'))
+    this.signingCert = core.getInput('SIGNING_CERT_FILE_NAME')
   }
 
   _validateInputs() {
@@ -93,6 +94,8 @@ class Action {
     packages
       .filter((p) => p.endsWith('.nupkg'))
       .forEach((nupkg) => {
+        if (this.signingCert) this._executeInProcess(`dotnet nuget sign ${nupkg} -CertificatePath ${this.signingCert} -Timestamper http://timestamp.digicert.com`)
+
         const pushCmd = `dotnet nuget push ${nupkg} -s ${this.nugetSource}/v3/index.json -k ${this.nugetKey} --skip-duplicate${!this.includeSymbols ? ' -n' : ''}`,
           pushOutput = this._executeCommand(pushCmd, { encoding: 'utf-8' }).stdout
         core.info(pushOutput)
@@ -113,7 +116,7 @@ class Action {
             core.warning(`supkg [${symbolsFilename}] is not existed. path:[${fullpathsymbolsFilename}]`)
           }
         }
-      }) 
+      })
 
     if (this.tagCommit) this._tagCommit(version)
   }

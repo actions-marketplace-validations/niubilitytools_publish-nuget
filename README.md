@@ -64,6 +64,8 @@ jobs:
 
           # Flag to set continue the next task when some error happened
           # INCLUDE_SYMBOLS: false
+          # Certificate file name (should be in root folder) to sign the package before upload
+          # SIGNING_CERT_FILE_NAME: Core.cer
 ```
 
 - Project gets published only if there's a `NUGET_KEY` configured in the repository
@@ -83,7 +85,7 @@ NUGET_KEY | | API key to authenticate with NuGet server
 NUGET_SOURCE | `https://api.nuget.org` | NuGet server uri hosting the packages, defaults to <https://api.nuget.org>
 INCLUDE_SYMBOLS | `false` | Flag to toggle pushing symbols along with nuget package to the server, disabled by default
 INCLUDE_SYMBOLS  | `false` | Flag to set continue the next task when some error happened
-
+SIGNING_CERT_FILE_NAME||Certificate file name (should be in root folder) to sign the package before upload
 **FYI:**
 
 - `NUGET_SOURCE` must support `/v3-flatcontainer/PACKAGE_NAME/index.json` for version change detection to work
