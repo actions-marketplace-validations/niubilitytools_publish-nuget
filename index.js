@@ -184,12 +184,6 @@ class Action {
     https
       .get(versionCheckUrl, options, (res) => {
         let body = ''
-
-        if (res.statusCode == 404) {
-          core.warning(`Url '${versionCheckUrl}' is not available now or '${this.packageName}' was never uploaded on NuGet`)
-          this._pushPackage(this.version, this.packageName)
-        }
-
         if (res.statusCode == 200) {
           res.setEncoding('utf8')
           res.on('data', (chunk) => (body += chunk))
@@ -200,6 +194,11 @@ class Action {
               this._pushPackage(this.version, this.packageName)
             } else core.info(`Found the version: ${this.nugetSource.replace('api.', '')}/packages/${this.packageName}/${this.version}`)
           })
+        } else if (res.statusCode == 404) {
+          core.warning(`Url '${versionCheckUrl}' is not available now or '${this.packageName}' was never uploaded on NuGet`)
+          this._pushPackage(this.version, this.packageName)
+        } else {
+          this._printErrorAndExit(`error: ${res.statusCode}: ${res.statusMessage}`)
         }
       })
       .on('error', (e) => {
