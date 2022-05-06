@@ -47,7 +47,7 @@ inputs:
         description: API key to authenticate with NuGet server
         required: false
     NUGET_SOURCE:
-        description: NuGet server uri hosting the packages, defaults to https://api.nuget.org
+        description: NuGet server uri hosting the packages, https://nuget.pkg.github.com or https://api.nuget.org. defaults to https://api.nuget.org
         required: false
         default: https://api.nuget.org
     INCLUDE_SYMBOLS:
@@ -64,6 +64,9 @@ inputs:
         default: false
     SIGNING_CERT_FILE_NAME:
         description: Certificate file name (should be in root folder) to sign the package before upload
+        required: false
+    GITHUB_USER:
+        description: Required for packages pushed to Github Package Registry. User allowed to push to repository, defaults to GITHUB_ACTOR (user that triggered the action) 
         required: false
 
 outputs:

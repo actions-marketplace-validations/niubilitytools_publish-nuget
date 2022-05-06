@@ -20,6 +20,34 @@ class Action {
     this.errorContinue = JSON.parse(core.getInput('ERROR_CONTINUE'))
     this.noBuild = JSON.parse(core.getInput('NO_BUILD'))
     this.signingCert = core.getInput('SIGNING_CERT_FILE_NAME')
+    this.githubUser = core.getInput('GITHUB_ACTOR') // process.env.INPUT_GITHUB_USER || process.env.GITHUB_ACTOR
+
+    if (this.nugetSource.startsWith(`https://api.nuget.org`)) {
+      this.sourceName = 'nuget.org'
+    } else {
+      this.sourceName = this.nugetSource
+    }
+
+    const existingSources = this._executeCommand('dotnet nuget list source', { encoding: 'utf8' }).stdout
+    if (existingSources.includes(this.nugetSource) === false) {
+      let addSourceCmd
+      if (this.nugetSource.startsWith(`https://nuget.pkg.github.com`)) {
+        this.sourceType = 'GPR'
+        addSourceCmd = `dotnet nuget add source ${this.nugetSource}/index.json --name=${this.sourceName} --username=${this.githubUser} --password=${this.nugetKey} --store-password-in-clear-text`
+      } else {
+        this.sourceType = 'NuGet'
+        addSourceCmd = `dotnet nuget add source ${this.nugetSource}/v3/index.json --name=${this.sourceName}`
+      }
+
+      core.info(this._executeCommand(addSourceCmd, { encoding: 'utf-8' }).stdout)
+    } else {
+      core.info(this.nugetSource + ' is already in sources.')
+    }
+
+    const list1 = this._executeCommand('dotnet nuget list source', { encoding: 'utf8' }).stdout
+    const enable = this._executeCommand(`dotnet nuget enable source ${this.sourceName}`, { encoding: 'utf8' }).stdout
+    core.info(list1)
+    core.info(enable)
   }
 
   _validateInputs() {
@@ -73,7 +101,7 @@ class Action {
   _pushPackage(version, name) {
     core.info(`✨ found new version (${version}) of ${name}`)
 
-    if (!this.nugetKey) {
+    if (this.sourceType == 'NuGet' && !this.nugetKey) {
       core.warning('😢 NUGET_KEY not given')
       return
     }
@@ -96,7 +124,10 @@ class Action {
       .forEach((nupkg) => {
         if (this.signingCert) this._executeInProcess(`dotnet nuget sign ${nupkg} -CertificatePath ${this.signingCert} -Timestamper http://timestamp.digicert.com`)
 
-        const pushCmd = `dotnet nuget push ${nupkg} -s ${this.nugetSource}/v3/index.json -k ${this.nugetKey} --skip-duplicate${!this.includeSymbols ? ' -n' : ''}`,
+        // const pushCmd = `dotnet nuget push ${nupkg} -s ${this.nugetSource}/v3/index.json -k ${this.nugetKey} --skip-duplicate${!this.includeSymbols ? ' -n' : ''}`,
+        const pushCmd = `dotnet nuget push ${nupkg} -s ${this.sourceName} ${this.sourceType !== 'GPR' ? `-k ${this.nugetKey}` : ''}--skip-duplicate${
+            !this.includeSymbols ? ' -n' : ''
+          }`,
           pushOutput = this._executeCommand(pushCmd, { encoding: 'utf-8' }).stdout
         core.info(pushOutput)
 
@@ -128,13 +159,28 @@ class Action {
 
     core.info(`Package Name: ${this.packageName}`)
 
-    let versionCheckUrl = `${this.nugetSource}/v3-flatcontainer/${this.packageName}/index.json`.toLowerCase()
-    core.info(`Url of checking Version: ${versionCheckUrl}`)
-    let options = {
-      headers: {
-        'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.127 Safari/537.36 Edg/100.0.1185.44',
-      },
+    let versionCheckUrl
+
+    let options = {}
+
+    //small hack to get package versions from Github Package Registry
+    if (this.sourceType === 'GPR') {
+      versionCheckUrl = `${this.nugetSource}/download/${this.packageName}/index.json`.toLowerCase()
+      options = {
+        method: 'GET',
+        auth: `${this.githubUser}:${this.nugetKey}`,
+      }
+      core.info(`This is GPR, changing url for versioning...`)
+    } else {
+      versionCheckUrl = `${this.nugetSource}/v3-flatcontainer/${this.packageName}/index.json`.toLowerCase()
+      options = {
+        headers: {
+          'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/100.0.4896.127 Safari/537.36 Edg/100.0.1185.44',
+        },
+      }
     }
+    core.info(`Url of checking Version: ${versionCheckUrl}`)
+
     https
       .get(versionCheckUrl, options, (res) => {
         let body = ''
