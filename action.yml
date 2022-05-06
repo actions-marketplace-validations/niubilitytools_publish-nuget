@@ -68,7 +68,9 @@ inputs:
     GITHUB_USER:
         description: Required for packages pushed to Github Package Registry. User allowed to push to repository, defaults to GITHUB_ACTOR (user that triggered the action) 
         required: false
-        default: ${{ github.actor }}
+    GITHUB_PASSWORD:
+        description: Github password, defaults to  NUGET_KEY
+        required: false
 
 outputs:
     VERSION:

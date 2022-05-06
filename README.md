@@ -66,6 +66,12 @@ jobs:
           # INCLUDE_SYMBOLS: false
           # Certificate file name (should be in root folder) to sign the package before upload
           # SIGNING_CERT_FILE_NAME: Core.cer
+
+          # Required for packages pushed to Github Package Registry. User allowed to push to repository, defaults to GITHUB_ACTOR (user that triggered the action) 
+          # GITHUB_USER: ${{ github.actor }}
+
+          # Github password, defaults to  NUGET_KEY
+          # GITHUB_PASSWORD: ${{ secrets.GithubPWD }}
 ```
 
 - Project gets published only if there's a `NUGET_KEY` configured in the repository
