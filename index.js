@@ -26,7 +26,7 @@ class Action {
     if (this.nugetSource.startsWith(`https://api.nuget.org`)) {
       this.sourceName = 'nuget.org'
     } else {
-      this.sourceName = this.nugetSource
+      this.sourceName = 'github'
     }
 
     const existingSources = this._executeCommand('dotnet nuget list source', { encoding: 'utf8' }).stdout
